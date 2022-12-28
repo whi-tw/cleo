@@ -26,7 +26,10 @@ class CompletionsCommand(Command):
     options = [
         helpers.option(
             "alias", None, "Alias for the current command.", flag=False, multiple=True
-        )
+        ),
+        helpers.option(
+            "function-name", None, "Name of the completion function.", flag=False
+        ),
     ]
 
     SUPPORTED_SHELLS = ("bash", "zsh", "fish")
@@ -291,6 +294,14 @@ script. Consult your shells documentation for how to add such directives.
         return os.path.basename(shell)
 
     def _generate_function_name(self, script_name: str, script_path: str) -> str:
+        if self.option("function-name"):
+            if self.option("function-name").startswith("_"):
+                return str(self.option("function-name"))
+            else:
+                raise ValueError(
+                    "The function name must start with an underscore (_). "
+                    "Please check the value of the --function-name option."
+                )
         sanitized_name = self._sanitize_for_function_name(script_name)
         md5_hash = hashlib.md5(script_path.encode()).hexdigest()[0:16]
         return f"_{sanitized_name}_{md5_hash}_complete"

@@ -34,6 +34,48 @@ def test_invalid_shell() -> None:
 
 @pytest.mark.skipif(WINDOWS, reason="Only test linux shells")
 @pytest.mark.parametrize(
+    "function_name, should_raise",
+    [("some_function", True), ("_some_function", False)],
+)
+@pytest.mark.parametrize(
+    "shell, expected_if_not_raise",
+    [
+        ("bash", "complete -o default -F {function_name} /path/to/script"),
+        ("zsh", "compdef {function_name} /path/to/script"),
+        ("fish", "function __fish{function_name}_no_subcommand"),
+    ],
+)
+def test_function_name_flag(
+    mocker: MockerFixture,
+    function_name: str,
+    should_raise: bool,
+    shell: str,
+    expected_if_not_raise: str,
+) -> None:
+    mocker.patch(
+        "cleo.io.inputs.string_input.StringInput.script_name",
+        new_callable=mocker.PropertyMock,
+        return_value="/path/to/script",
+    )
+
+    command = app.find("completions")
+    tester = CommandTester(command)
+
+    if should_raise:
+        with pytest.raises(
+            ValueError, match="The function name must start with an underscore"
+        ):
+            tester.execute(f"{shell} --function-name={function_name}")
+    else:
+        tester.execute(f"{shell} --function-name={function_name}")
+        assert (
+            expected_if_not_raise.format(function_name=function_name)
+            in tester.io.fetch_output()
+        )
+
+
+@pytest.mark.skipif(WINDOWS, reason="Only test linux shells")
+@pytest.mark.parametrize(
     "script_path, output_fixture_filename",
     [
         ("/path/to/my/script", "bash.txt"),
