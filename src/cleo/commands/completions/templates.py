@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 
+# language="Shell Script" # noqa: E800
 BASH_TEMPLATE = """\
 %(function)s()
 {
@@ -52,6 +53,7 @@ BASH_TEMPLATE = """\
 
 %(compdefs)s"""
 
+# language="Shell Script" # noqa: E800
 ZSH_TEMPLATE = """\
 #compdef %(script_name)s
 
@@ -101,6 +103,7 @@ ZSH_TEMPLATE = """\
 %(function)s "$@"
 %(compdefs)s"""
 
+# language="Shell Script" # noqa: E800
 FISH_TEMPLATE = """\
 function __fish%(function)s_no_subcommand
     for i in (commandline -opc)
@@ -120,6 +123,5 @@ end
 # command options
 
 %(cmds_opts)s"""
-
 
 TEMPLATES = {"bash": BASH_TEMPLATE, "zsh": ZSH_TEMPLATE, "fish": FISH_TEMPLATE}
