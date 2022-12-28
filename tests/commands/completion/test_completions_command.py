@@ -33,11 +33,20 @@ def test_invalid_shell() -> None:
 
 
 @pytest.mark.skipif(WINDOWS, reason="Only test linux shells")
-def test_bash(mocker: MockerFixture) -> None:
+@pytest.mark.parametrize(
+    "script_path, output_fixture_filename",
+    [
+        ("/path/to/my/script", "bash.txt"),
+        ("/path/with space/to/my/script", "bash_with_space_in_script_name.txt"),
+    ],
+)
+def test_bash(
+    mocker: MockerFixture, script_path: str, output_fixture_filename: str
+) -> None:
     mocker.patch(
         "cleo.io.inputs.string_input.StringInput.script_name",
         new_callable=mocker.PropertyMock,
-        return_value="/path/to/my/script",
+        return_value=script_path,
     )
     mocker.patch(
         "cleo.commands.completions_command.CompletionsCommand._generate_function_name",
@@ -48,18 +57,31 @@ def test_bash(mocker: MockerFixture) -> None:
     tester = CommandTester(command)
     tester.execute("bash")
 
-    with open(os.path.join(os.path.dirname(__file__), "fixtures", "bash.txt")) as f:
+    fixture_path = os.path.join(
+        os.path.dirname(__file__), "fixtures", output_fixture_filename
+    )
+
+    with open(fixture_path) as f:
         expected = f.read()
 
     assert expected == tester.io.fetch_output().replace("\r\n", "\n")
 
 
 @pytest.mark.skipif(WINDOWS, reason="Only test linux shells")
-def test_zsh(mocker: MockerFixture) -> None:
+@pytest.mark.parametrize(
+    "script_path, output_fixture_filename",
+    [
+        ("/path/to/my/script", "zsh.txt"),
+        ("/path/with space/to/my/script", "zsh_with_space_in_script_name.txt"),
+    ],
+)
+def test_zsh(
+    mocker: MockerFixture, script_path: str, output_fixture_filename: str
+) -> None:
     mocker.patch(
         "cleo.io.inputs.string_input.StringInput.script_name",
         new_callable=mocker.PropertyMock,
-        return_value="/path/to/my/script",
+        return_value=script_path,
     )
     mocker.patch(
         "cleo.commands.completions_command.CompletionsCommand._generate_function_name",
@@ -70,7 +92,9 @@ def test_zsh(mocker: MockerFixture) -> None:
     tester = CommandTester(command)
     tester.execute("zsh")
 
-    with open(os.path.join(os.path.dirname(__file__), "fixtures", "zsh.txt")) as f:
+    with open(
+        os.path.join(os.path.dirname(__file__), "fixtures", output_fixture_filename)
+    ) as f:
         expected = f.read()
 
     assert expected == tester.io.fetch_output().replace("\r\n", "\n")

@@ -141,7 +141,11 @@ script. Consult your shells documentation for how to add such directives.
 
     def render_bash(self) -> str:
         script_name, script_path = self._get_script_name_and_path()
-        aliases = [script_name, script_path, *self.option("alias")]
+        aliases = [
+            script_name,
+            self._quote_script_path_for_compdef(script_path),
+            *self.option("alias"),
+        ]
         function = self._generate_function_name(script_name, script_path)
 
         # Global options
@@ -183,7 +187,10 @@ script. Consult your shells documentation for how to add such directives.
 
     def render_zsh(self) -> str:
         script_name, script_path = self._get_script_name_and_path()
-        aliases = [script_path, *self.option("alias")]
+        aliases = [
+            self._quote_script_path_for_compdef(script_path),
+            *self.option("alias"),
+        ]
         function = self._generate_function_name(script_name, script_path)
 
         def sanitize(s: str) -> str:
@@ -291,6 +298,9 @@ script. Consult your shells documentation for how to add such directives.
         name = name.replace("-", "_")
 
         return re.sub("[^A-Za-z0-9_]+", "", name)
+
+    def _quote_script_path_for_compdef(self, script_path: str) -> str:
+        return shell_quote(script_path) if " " in script_path else script_path
 
     def _zsh_describe(self, value: str, description: str | None = None) -> str:
         value = '"' + value.replace(":", "\\:")
