@@ -62,4 +62,5 @@ _my_function()
 }
 
 _my_function "$@"
+compdef _my_function script
 compdef _my_function '/path/with space/to/my/script'

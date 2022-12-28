@@ -188,6 +188,7 @@ script. Consult your shells documentation for how to add such directives.
     def render_zsh(self) -> str:
         script_name, script_path = self._get_script_name_and_path()
         aliases = [
+            script_name,
             self._quote_script_path_for_compdef(script_path),
             *self.option("alias"),
         ]
